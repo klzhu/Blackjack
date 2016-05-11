@@ -13,6 +13,8 @@ public class Player extends Participants {
     private boolean doubleDown;
     private boolean hasSplit;
     private boolean splitWon;
+    private boolean splitBusted;
+    private boolean splitTied;
     private int bet;
     private int splitBet;
     private int hitsLeft;
@@ -20,6 +22,7 @@ public class Player extends Participants {
     private int moneyLeft;
     private int splitHandValue;
     private ArrayList<Card> splitHand;
+    private ArrayList<Integer> splitAcePositions;
 
     public Player() {
         super();
@@ -29,8 +32,11 @@ public class Player extends Participants {
         busted = false;
         hasSplit = false;
         splitWon = false;
+        splitBusted = false;
+        splitTied = false;
         playerId = playerIdCounter++;
         moneyLeft = STARTING_MONEY;
+        splitAcePositions = new ArrayList<Integer>();
     }
 
     public long getPlayerId() {
@@ -75,9 +81,11 @@ public class Player extends Participants {
         return moneyLeft;
     }
 
-    public void resetPlayerBools() {
+    public void resetPlayerVars() {
         bet = 0;
         splitBet = 0;
+        splitHandValue = 0;
+        splitHitsLeft = 0;
         tied = false;
         busted = false;
         isWinner = false;
@@ -85,8 +93,8 @@ public class Player extends Participants {
         hasSplit = false;
         splitHand = null;
         splitWon = false;
-        splitHandValue = 0;
-        splitHitsLeft = 0;
+        splitTied = false;
+        splitAcePositions = new ArrayList<Integer>();
     }
 
     public int getBet() {
@@ -130,20 +138,89 @@ public class Player extends Participants {
     public void splitPair() {
         hasSplit = true;
         splitHand = new ArrayList<Card>();
-        
+
         Card c = currHand.remove(1);
         currHandValue -= c.getValue();
-        
+
         makeSplitBet(bet);
         addSplitCard(c);
+        
+        //we need to now update our ace positions if we had any
+        for (int i = 0; i < acePositions.size(); i++)
+        {
+            if (acePositions.get(i) == 1) {
+                splitAcePositions.add(acePositions.remove(i));
+            }
+        }
     }
 
     public boolean getHasSplit() {
         return hasSplit;
     }
-    
-    public void addSplitCard(Card c){
+
+    public void addSplitCard(Card c) {
         splitHandValue += c.getValue();
         splitHand.add(c);
+    }
+
+    public ArrayList<Card> getSplitHand() {
+        return splitHand;
+    }
+
+    public void splitBusted() {
+        splitBusted = true;
+    }
+
+    public boolean getSplitBusted() {
+        return splitBusted;
+    }
+
+    public int getSplitHandValue() {
+        return splitHandValue;
+    }
+
+    public int getSplitHitsLeft() {
+        return splitHitsLeft;
+    }
+
+    public void decSplitHitsLeft() {
+        splitHitsLeft--;
+    }
+
+    public int getNextSplitAcePosition() {
+        if (splitAcePositions.isEmpty())
+            return -1;
+        return splitAcePositions.remove(0);
+    }
+
+    public void addToSplitAcePositions(int acePos) {
+        splitAcePositions.add(acePos);
+    }
+
+    public void recalcSplitHandValue() {
+        splitHandValue = 0;
+        for (int i = 0; i < splitHand.size(); i++) {
+            splitHandValue += splitHand.get(i).getValue();
+        }
+    }
+
+    public boolean getSplitWon() {
+        return splitWon;
+    }
+
+    public void setSplitWon() {
+        splitWon = true;
+    }
+
+    public void setSplitTied() {
+        splitTied = true;
+    }
+
+    public boolean getSplitTied() {
+        return splitTied;
+    }
+
+    public int getSplitBet() {
+        return splitBet;
     }
 }
